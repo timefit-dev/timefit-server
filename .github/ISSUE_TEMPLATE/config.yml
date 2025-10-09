@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 💬 Discussion
+    url: https://github.com/theo/timefit-server/discussions
+    about: 일반적인 토론이나 아이디어 공유는 Discussions를 이용해주세요
+  - name: 📧 Email
+    url: mailto:contact@example.com
+    about: 긴급하거나 민감한 사항은 이메일로 문의해주세요
