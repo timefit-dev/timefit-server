@@ -1,5 +1,5 @@
 package com.example.timefit.domain.user.dto;
 
-public class UserResponseDto {
+public class AuthResponse {
   
 }

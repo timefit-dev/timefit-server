@@ -1,5 +1,5 @@
 package com.example.timefit.domain.room.dto;
 
-public class RoomResponseDto {
+public class RoomResponse {
   
 }
