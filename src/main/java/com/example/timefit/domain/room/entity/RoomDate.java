@@ -12,7 +12,6 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "room_dates", uniqueConstraints = {
         @UniqueConstraint(
                 name = "DATE_ROOM_UNIQUE", // DB에 표시될 제약조건 이름
