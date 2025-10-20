@@ -29,11 +29,11 @@ public class RoomDate {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)
-    private Room roomDateId;
+    private Room room;
 
     @Builder
-    public RoomDate(LocalDate date, Room roomDateId) {
+    public RoomDate(LocalDate date, Room room) {
         this.date = date;
-        this.roomDateId = roomDateId;
+        this.room = room;
     }
 }
