@@ -2,6 +2,7 @@ package com.example.timefit.domain.user.controller;
 
 import com.example.timefit.domain.user.dto.UserResponse;
 import com.example.timefit.domain.user.service.UserService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,7 +16,8 @@ public class UserController {
   }
 
   @GetMapping("/{socialId}")
-  public UserResponse getUserInfo(@PathVariable String socialId) {
-    return userService.getUserBySocialId(socialId);
+  public ResponseEntity<UserResponse> getUserInfo(@PathVariable String socialId) {
+    UserResponse user = userService.getUserBySocialId(socialId);
+    return ResponseEntity.ok(user);
   }
 }
