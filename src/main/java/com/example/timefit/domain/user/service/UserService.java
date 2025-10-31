@@ -3,17 +3,15 @@ package com.example.timefit.domain.user.service;
 import com.example.timefit.domain.user.dto.UserResponse;
 import com.example.timefit.domain.user.entity.User;
 import com.example.timefit.domain.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
   private final UserRepository userRepository;
-
-  public UserService(UserRepository userRepository) {
-      this.userRepository = userRepository;
-  }
 
   public UserResponse getUserBySocialId(String socialId) {
     User user = userRepository.findBySocialId(socialId)
