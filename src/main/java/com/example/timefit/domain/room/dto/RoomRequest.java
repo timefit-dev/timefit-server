@@ -10,15 +10,10 @@ import java.util.List;
 
 public class RoomRequest {
     @Getter
-    @NoArgsConstructor
     public static class CreateDTO{
         private String title;
         private List<LocalDate> dates;
-
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
-        private LocalTime startTime;
-
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
-        private LocalTime endTime;
+        private String startTime;
+        private String endTime;
     }
 }
