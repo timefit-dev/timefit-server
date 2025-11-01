@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "rooms")
@@ -28,6 +30,9 @@ public class Room {
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RoomDate> dates = new ArrayList<>();
+
     @Column(name = "start_time", length = 20, nullable = false)
     private String startTime;
 
@@ -43,10 +48,12 @@ public class Room {
     @Column(name = "expires_at", nullable = false)
     private LocalDateTime expiresAt;
 
-    public Room(String title, String inviteCode, User owner) {
+    public Room(String title, String inviteCode, User owner, String startTime, String endTime) {
         this.title = title;
         this.inviteCode = inviteCode;
         this.owner = owner;
+        this.startTime = startTime;
+        this.endTime = endTime;
     }
 
     public void onPrePersist() {
