@@ -1,5 +1,7 @@
 package com.example.timefit.domain.user.dto;
 
-public class AuthResponse {
-  
-}
+public record AuthResponse(
+    String accessToken,
+    String refreshToken,
+    UserResponse user
+) {}
