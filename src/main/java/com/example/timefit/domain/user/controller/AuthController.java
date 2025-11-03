@@ -4,6 +4,7 @@ import com.example.timefit.domain.user.dto.AuthRequest;
 import com.example.timefit.domain.user.dto.AuthResponse;
 import com.example.timefit.domain.user.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,7 +15,8 @@ public class AuthController {
   private final AuthService authService;
 
   @PostMapping("/login")
-  public AuthResponse socialLogin(@RequestBody AuthRequest request) {
-    return authService.socialLogin(request);
+  public ResponseEntity<AuthResponse> socialLogin(@RequestBody AuthRequest request) {
+    AuthResponse response = authService.socialLogin(request);
+    return ResponseEntity.ok(response);
   }
 }
