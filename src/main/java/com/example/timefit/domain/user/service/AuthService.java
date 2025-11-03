@@ -2,16 +2,35 @@ package com.example.timefit.domain.user.service;
 
 import org.springframework.stereotype.Service;
 
-import com.example.timefit.domain.user.dto.AuthRequest;
-import com.example.timefit.domain.user.dto.AuthResponse;
+import com.example.timefit.domain.user.dto.LoginRequest;
+import com.example.timefit.domain.user.dto.LoginResponse;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
+
+  private final KakaoOAuthService kakaoOAuthService;
+  private final GoogleOAuthService googleOAuthService;
+  private final AppleOAuthService appleOAuthService;
   
-  public AuthResponse socialLogin(AuthRequest request) {
-    //카카오인가코드 받아오는 로직 추가
-    System.out.println("provider: " + request.provider());
-    System.out.println("authorizationCode: " + request.authorizationCode());
-    return null;
+  public LoginResponse socialLogin(LoginRequest request) {
+    String provider = request.provider();
+    
+    switch (provider.toLowerCase()) {
+      case "kakao" -> {
+        System.out.println("[AuthService] 카카오 로그인 진입");
+        return kakaoOAuthService.login(request.authorizationCode());
+      }
+      case "google" -> {
+        System.out.println("[AuthService] 구글 로그인 진입");
+        return googleOAuthService.login(request.authorizationCode());
+      }
+      case "apple" -> {
+        System.out.println("[AuthService] 애플 로그인 진입");
+        return appleOAuthService.login(request.authorizationCode());
+      }
+      default -> throw new IllegalArgumentException("지원하지 않는 로그인 방식입니다: " + provider);
+    }
   }
 }
