@@ -1,11 +1,13 @@
 package com.example.timefit.domain.room.entity;
 
 import com.example.timefit.domain.user.entity.User;
+import com.example.timefit.domain.room.dto.RoomUpdateRequest;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,5 +63,36 @@ public class Room {
         this.createdAt = now;
         this.updatedAt = now;
         this.expiresAt = now.plusDays(2);
+    }
+
+    public void patchUpdate(RoomUpdateRequest dto) {
+        boolean updated = false;
+
+        if (dto.getTitle() != null && !dto.getTitle().isBlank()) {
+            this.title = dto.getTitle();
+            updated = true;
+        }
+
+        if (dto.getStartTime() != null) {
+            this.startTime = dto.getStartTime();
+            updated = true;
+        }
+
+        if (dto.getEndTime() != null) {
+            this.endTime = dto.getEndTime();
+            updated = true;
+        }
+
+        if (dto.getDates() != null) {
+            this.dates.clear();
+            for (LocalDate date : dto.getDates()) {
+                this.dates.add(new RoomDate(date, this)); // (DB에 새 날짜 INSERT)
+            }
+            updated = true;
+        }
+
+        if (updated) {
+            this.updatedAt = LocalDateTime.now();
+        }
     }
 }
