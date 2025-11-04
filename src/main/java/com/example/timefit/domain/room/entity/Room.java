@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,10 +35,10 @@ public class Room {
     private List<RoomDate> dates = new ArrayList<>();
 
     @Column(name = "start_time", length = 20, nullable = false)
-    private String startTime;
+    private LocalTime startTime;
 
     @Column(name = "end_time", length = 20, nullable = false)
-    private String endTime;
+    private LocalTime endTime;
 
     @Column(name = "created_at", updatable = false, nullable = false)
     private LocalDateTime createdAt;
@@ -48,7 +49,7 @@ public class Room {
     @Column(name = "expires_at", nullable = false)
     private LocalDateTime expiresAt;
 
-    public Room(String title, String inviteCode, User owner, String startTime, String endTime) {
+    public Room(String title, String inviteCode, User owner, LocalTime startTime, LocalTime endTime) {
         this.title = title;
         this.inviteCode = inviteCode;
         this.owner = owner;
