@@ -6,8 +6,14 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class AppleOAuthService {
+public class AppleOAuthService implements SocialLoginService {
 
+    @Override
+    public String getProviderName() {
+        return "apple";
+    }
+
+    @Override
     public LoginResponse login(String authorizationCode) {
         log.info("[AppleOAuthService] 인가코드로 애플 로그인 진행 - code: {}", authorizationCode);
         // TODO: 애플 연동 로직 추가
