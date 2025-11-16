@@ -16,11 +16,11 @@ public class UserService {
   private final UserRepository userRepository;
 
   public UserResponse getUserBySocialId(String socialId) {
-    User user = userRepository.findBySocialId(socialId);
-    if (user == null) {
-      throw new IllegalArgumentException("해당 유저를 찾을 수 없습니다. socialId=" + socialId);
-    }
-            
+    User user = userRepository.findBySocialId(socialId)
+            .orElseThrow(() -> 
+                new IllegalArgumentException("해당 유저를 찾을 수 없습니다. socialId=" + socialId)
+            );
+
     return new UserResponse(user);
   }
   
