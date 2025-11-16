@@ -1,5 +1,7 @@
 package com.example.timefit.domain.room.entity;
 
+import com.example.timefit.domain.exeption.CustomException;
+import com.example.timefit.domain.exeption.ErrorCode;
 import com.example.timefit.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -66,9 +68,7 @@ public class Room {
     }
 
     public void updateTitle(String title) {
-        if (title != null && !title.isBlank()) {
-            this.title = title;
-        }
+        this.title = title;
     }
 
     public void updateDates(List<LocalDate> newDates) {
@@ -87,5 +87,11 @@ public class Room {
     public void updateEndTime(LocalTime endTime) {
         this.endTime = endTime;
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public void validateOwner(User user) {
+        if (!this.owner.getId().equals(user.getId())) {
+            throw new CustomException(ErrorCode.OWNER_NOT_FOUND);
+        }
     }
 }

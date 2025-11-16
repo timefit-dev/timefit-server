@@ -1,5 +1,7 @@
 package com.example.timefit.domain.room.service;
 
+import com.example.timefit.domain.exeption.CustomException;
+import com.example.timefit.domain.exeption.ErrorCode;
 import com.example.timefit.domain.room.dto.RoomCreateRequest;
 import com.example.timefit.domain.room.dto.RoomDeleteMessage;
 import com.example.timefit.domain.room.dto.RoomResponse;
@@ -8,7 +10,6 @@ import com.example.timefit.domain.room.entity.Room;
 import com.example.timefit.domain.room.entity.RoomDate;
 import com.example.timefit.domain.room.repository.RoomRepository;
 import com.example.timefit.domain.user.entity.User;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,10 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,14 +28,14 @@ public class RoomService {
     private final RoomRepository roomRepository;
 
     @Transactional
-    public RoomResponse createRoom(RoomCreateRequest dto, User owner) {
+    public RoomResponse createRoom(RoomCreateRequest request, User owner) {
         String newInviteCode = UUID.randomUUID().toString();
 
-        LocalTime startTime = parseTime(dto.getStartTime());
-        LocalTime endTime = parseTime(dto.getEndTime());
+        LocalTime startTime = parseTime(request.getStartTime());
+        LocalTime endTime = parseTime(request.getEndTime());
 
         Room room = new Room(
-                dto.getTitle(),
+                request.getTitle(),
                 newInviteCode,
                 owner,
                 startTime,
@@ -43,7 +43,7 @@ public class RoomService {
         );
         room.onPrePersist();
 
-        for (LocalDate date : dto.getDates()) {
+        for (LocalDate date : request.getDates()) {
             room.getDates().add(new RoomDate(date, room));
         }
 
@@ -54,56 +54,48 @@ public class RoomService {
 
     @Transactional(readOnly = true)
     public List<RoomResponse> getAllRooms() {
-        return roomRepository.findAll().stream()
-                .map(RoomResponse::new)
-                .collect(Collectors.toList());
+        List<Room> rooms = roomRepository.findAll();
+
+        List<RoomResponse> roomList = new ArrayList<>();
+
+        for (Room room : rooms) {
+            RoomResponse dto = new RoomResponse(room);
+            roomList.add(dto);
+        }
+
+        return roomList;
     }
 
     @Transactional
     public RoomResponse updateRoom(Long roomId, RoomUpdateRequest dto, User user) {
         Room room = findRoomById(roomId);
-        checkRoomOwner(room, user);
+        room.validateOwner(user);
 
-        if (dto.getTitle() != null && !dto.getTitle().isBlank()) {
-            room.updateTitle(dto.getTitle());
-        }
+        room.updateTitle(dto.getTitle());
 
-        if (dto.getDates() != null) {
-            room.updateDates(dto.getDates());
-        }
+        room.updateDates(dto.getDates());
 
-        if (dto.getStartTime() != null) {
-            LocalTime newStartTime = parseTime(dto.getStartTime());
-            room.updateStartTime(newStartTime);
-        }
+        LocalTime newStartTime = parseTime(dto.getStartTime());
+        room.updateStartTime(newStartTime);
 
-        if (dto.getEndTime() != null) {
-            LocalTime newEndTime = parseTime(dto.getEndTime());
-            room.updateEndTime(newEndTime);
-        }
+        LocalTime newEndTime = parseTime(dto.getEndTime());
+        room.updateEndTime(newEndTime);
 
         return new RoomResponse(room);
     }
 
     @Transactional
-    public RoomDeleteMessage deleteRoom(Long roomId, User user) {
+    public RoomDeleteMessage delete(Long roomId, User user) {
         Room room = findRoomById(roomId);
-        checkRoomOwner(room, user);
+        room.validateOwner(user);
         roomRepository.delete(room);
 
         return new RoomDeleteMessage("방 삭제 성공");
     }
 
-
     private Room findRoomById(Long roomId) {
         return roomRepository.findById(roomId)
-                .orElseThrow(() -> new EntityNotFoundException("해당 방을 찾을 수 없습니다. id: " + roomId));
-    }
-
-    private void checkRoomOwner(Room room, User user) {
-        if (!room.getOwner().getId().equals(user.getId())) {
-            throw new RuntimeException("방을 수정/삭제할 권한이 없습니다.");
-        }
+                .orElseThrow(() -> new CustomException(ErrorCode.ROOM_NOT_FOUND));
     }
 
     private LocalTime parseTime(String timeString) {

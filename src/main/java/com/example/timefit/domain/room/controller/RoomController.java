@@ -22,10 +22,10 @@ public class RoomController {
 
     @PostMapping
     public ResponseEntity<RoomResponse> createRoom(
-            @RequestBody RoomCreateRequest requestDTO,
+            @RequestBody RoomCreateRequest request,
             @AuthenticationPrincipal User user
     ) {
-        RoomResponse responseDTO = roomService.createRoom(requestDTO, user);
+        RoomResponse responseDTO = roomService.createRoom(request, user);
         return ResponseEntity.ok(responseDTO);
     }
 
@@ -38,10 +38,10 @@ public class RoomController {
     @PutMapping("/{roomId}")
     public ResponseEntity<RoomResponse> updateRoom(
             @PathVariable Long roomId,
-            @RequestBody RoomUpdateRequest requestDTO,
+            @RequestBody RoomUpdateRequest request,
             @AuthenticationPrincipal User user
     ) {
-        RoomResponse responseDTO = roomService.updateRoom(roomId, requestDTO, user);
+        RoomResponse responseDTO = roomService.updateRoom(roomId, request, user);
         return ResponseEntity.ok(responseDTO);
     }
 
@@ -50,7 +50,7 @@ public class RoomController {
             @PathVariable Long roomId,
             @AuthenticationPrincipal User user
     ) {
-        RoomDeleteMessage response = roomService.deleteRoom(roomId, user);
+        RoomDeleteMessage response = roomService.delete(roomId, user);
         return ResponseEntity.ok(response);
     }
 }
