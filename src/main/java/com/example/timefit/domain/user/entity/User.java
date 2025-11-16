@@ -32,4 +32,12 @@ public class User {
 
   @Column
   private LocalDateTime updatedAt;
+
+  public User(String socialId, String provider, String nickname, String profileImage) {
+    this.socialId = socialId;
+    this.provider = provider;
+    this.nickname = nickname;
+    this.profileImage = profileImage;
+  }
+
 }
