@@ -22,7 +22,12 @@ public class UserController {
   @GetMapping("/me")
     public ResponseEntity<UserResponse> getMyInfo(@AuthenticationPrincipal OAuth2User oAuth2User) {
 
-        String socialId = oAuth2User.getAttribute("id").toString();
+        Object idAttr = oAuth2User.getAttribute("id");
+        if (idAttr == null) {
+            throw new IllegalStateException("OAuth2User attributes did not contain id");
+        }
+
+        String socialId = idAttr.toString();
 
         User user = userRepository.findBySocialId(socialId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자 정보를 찾을 수 없습니다."));
