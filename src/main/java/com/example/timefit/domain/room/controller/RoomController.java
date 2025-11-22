@@ -6,7 +6,6 @@ import com.example.timefit.domain.room.dto.RoomResponse;
 import com.example.timefit.domain.room.dto.RoomUpdateRequest;
 import com.example.timefit.domain.room.service.RoomService;
 import com.example.timefit.domain.user.entity.User;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -39,7 +38,7 @@ public class RoomController {
     @PutMapping("/{roomId}")
     public ResponseEntity<RoomResponse> updateRoom(
             @PathVariable Long roomId,
-            @Valid @RequestBody RoomUpdateRequest request,
+            @RequestBody RoomUpdateRequest request,
             @AuthenticationPrincipal User user
     ) {
         RoomResponse responseDTO = roomService.updateRoom(roomId, request, user);
@@ -47,7 +46,7 @@ public class RoomController {
     }
 
     @DeleteMapping("/{roomId}")
-    public ResponseEntity<RoomDeleteMessage> deleteRoom(
+    public ResponseEntity<RoomDeleteMessage> delete(
             @PathVariable Long roomId,
             @AuthenticationPrincipal User user
     ) {

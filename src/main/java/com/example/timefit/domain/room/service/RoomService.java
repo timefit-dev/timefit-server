@@ -67,18 +67,18 @@ public class RoomService {
     }
 
     @Transactional
-    public RoomResponse updateRoom(Long roomId, RoomUpdateRequest dto, User user) {
+    public RoomResponse updateRoom(Long roomId, RoomUpdateRequest request, User user) {
         Room room = findRoomById(roomId);
         room.validateOwner(user);
 
-        room.updateTitle(dto.getTitle());
+        room.updateTitle(request.getTitle());
 
-        room.updateDates(dto.getDates());
+        room.updateDates(request.getDates());
 
-        LocalTime newStartTime = parseTime(dto.getStartTime());
+        LocalTime newStartTime = parseTime(request.getStartTime());
         room.updateStartTime(newStartTime);
 
-        LocalTime newEndTime = parseTime(dto.getEndTime());
+        LocalTime newEndTime = parseTime(request.getEndTime());
         room.updateEndTime(newEndTime);
 
         return new RoomResponse(room);
