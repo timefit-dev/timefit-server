@@ -20,6 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -54,16 +55,9 @@ public class RoomService {
 
     @Transactional(readOnly = true)
     public List<RoomResponse> getAllRooms() {
-        List<Room> rooms = roomRepository.findAll();
-
-        List<RoomResponse> roomList = new ArrayList<>();
-
-        for (Room room : rooms) {
-            RoomResponse dto = new RoomResponse(room);
-            roomList.add(dto);
-        }
-
-        return roomList;
+        return roomRepository.findAll().stream()
+                .map(RoomResponse::new)
+                .collect(Collectors.toList());
     }
 
     @Transactional
