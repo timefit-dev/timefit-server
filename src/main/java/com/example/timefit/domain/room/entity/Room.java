@@ -1,11 +1,14 @@
 package com.example.timefit.domain.room.entity;
 
+import com.example.timefit.domain.exeption.CustomException;
+import com.example.timefit.domain.exeption.ErrorCode;
 import com.example.timefit.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -62,5 +65,33 @@ public class Room {
         this.createdAt = now;
         this.updatedAt = now;
         this.expiresAt = now.plusDays(2);
+    }
+
+    public void updateTitle(String title) {
+        this.title = title;
+    }
+
+    public void updateDates(List<LocalDate> newDates) {
+        this.dates.clear();
+        for (LocalDate date : newDates) {
+            this.dates.add(new RoomDate(date, this));
+        }
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void updateStartTime(LocalTime startTime) {
+        this.startTime = startTime;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void updateEndTime(LocalTime endTime) {
+        this.endTime = endTime;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void validateOwner(User user) {
+        if (!this.owner.getId().equals(user.getId())) {
+            throw new CustomException(ErrorCode.OWNER_NOT_FOUND);
+        }
     }
 }

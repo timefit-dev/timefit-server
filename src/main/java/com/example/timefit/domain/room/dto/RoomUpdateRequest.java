@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Getter
-public class RoomCreateRequest {
+public class RoomUpdateRequest {
     private String title;
     private List<LocalDate> dates;
     private String startTime;
