@@ -16,6 +16,8 @@ public record RoomResponse(
         String invitecode,
         String owner,
         List<LocalDate> dates,
+        LocalTime startTime,
+        LocalTime endTime,
         List<String> timelist,
         String createdAt,
         String updatedAt,
@@ -33,6 +35,8 @@ public record RoomResponse(
                 room.getDates().stream()
                         .map(RoomDate::getDate)
                         .collect(Collectors.toList()),
+                room.getStartTime(),
+                room.getEndTime(),
                 generateTimeList(room.getStartTime(), room.getEndTime()),
                 room.getCreatedAt().toLocalDate().format(DATE_FORMATTER),
                 room.getUpdatedAt() == null ? null : room.getUpdatedAt().toLocalDate().format(DATE_FORMATTER),
