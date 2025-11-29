@@ -1,61 +1,67 @@
 package com.example.timefit.domain.user.service;
 
 import com.example.timefit.domain.user.entity.User;
+import com.example.timefit.domain.user.entity.RefreshToken;
 import com.example.timefit.domain.user.repository.UserRepository;
-import com.example.timefit.domain.user.oauth.OAuth2UserInfo;
+import com.example.timefit.domain.user.repository.RefreshTokenRepository;
 import com.example.timefit.domain.user.oauth.KakaoOAuth2UserInfo;
+import com.example.timefit.global.jwt.JwtTokenProvider;
+import com.example.timefit.domain.user.dto.LoginResponse;
+import com.example.timefit.domain.user.dto.UserResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
-import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AuthService extends DefaultOAuth2UserService {
+public class AuthService {
 
+    private final KakaoOAuthService kakaoOAuthService;
     private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    @Override
-    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2User oAuth2User = super.loadUser(userRequest);
+    public LoginResponse loginWithKakao(String kakaoAccessToken) {
 
-        String provider = userRequest.getClientRegistration().getRegistrationId();
-        Map<String, Object> attributes = oAuth2User.getAttributes();
-
-        OAuth2UserInfo userInfo = switch (provider) {
-            case "kakao" -> new KakaoOAuth2UserInfo(attributes);
-            default -> throw new IllegalArgumentException("지원하지 않는 provider: " + provider);
-        };
+        KakaoOAuth2UserInfo userInfo = kakaoOAuthService.getUserInfo(kakaoAccessToken);
 
         User user = userRepository.findBySocialId(userInfo.getSocialId())
                 .orElseGet(() -> userRepository.save(
                         new User(
                                 userInfo.getSocialId(),
-                                provider,
+                                "KAKAO",
                                 userInfo.getNickname(),
                                 userInfo.getProfileImage()
                         )
                 ));
 
-        Map<String, Object> customAttributes = new HashMap<>(attributes);
-        customAttributes.put("id", user.getId());
+        String accessToken = jwtTokenProvider.createAccessToken(user.getId());
+        String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
 
-        return new DefaultOAuth2User(
-                List.of(new SimpleGrantedAuthority("ROLE_USER")),
-                customAttributes,
-                "id"
-        );
+        saveRefreshToken(user.getId(), refreshToken);
+
+        return new LoginResponse(accessToken, refreshToken, new UserResponse(user));
+    }
+
+    private void saveRefreshToken(Long userId, String refreshToken) {
+
+        LocalDateTime expiry = LocalDateTime.now().plusDays(14);
+
+        refreshTokenRepository.findByUserId(userId)
+                .ifPresentOrElse(
+                        rt -> rt.update(refreshToken, expiry),
+                        () -> refreshTokenRepository.save(
+                                RefreshToken.create(
+                                        userId,
+                                        refreshToken,
+                                        expiry
+                                )
+                        )
+                );
     }
 }
