@@ -15,10 +15,13 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/kakao")
-    public ResponseEntity<LoginResponse> kakaoLogin(@RequestBody LoginRequest request) {
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> socialLogin(@RequestBody LoginRequest request) {
 
-        LoginResponse response = authService.loginWithKakao(request.accessToken());
+        LoginResponse response = authService.socialLogin(
+                request.provider(),
+                request.accessToken()
+        );
         return ResponseEntity.ok(response);
     }
 }

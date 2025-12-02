@@ -26,7 +26,18 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public LoginResponse loginWithKakao(String kakaoAccessToken) {
+    public LoginResponse socialLogin(String provider, String accessToken) {
+
+        switch (provider.toUpperCase()) {
+            case "KAKAO":
+                return loginWithKakao(accessToken);
+
+            default:
+                throw new IllegalArgumentException("Unsupported provider: " + provider);
+        }
+    }
+
+    private LoginResponse loginWithKakao(String kakaoAccessToken) {
 
         KakaoOAuth2UserInfo userInfo = kakaoOAuthService.getUserInfo(kakaoAccessToken);
 
