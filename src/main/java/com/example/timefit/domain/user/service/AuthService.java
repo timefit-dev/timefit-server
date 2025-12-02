@@ -34,9 +34,7 @@ public class AuthService {
                 .orElseGet(() -> userRepository.save(
                         new User(
                                 userInfo.getSocialId(),
-                                "KAKAO",
-                                userInfo.getNickname(),
-                                userInfo.getProfileImage()
+                                "KAKAO"
                         )
                 ));
 
@@ -48,6 +46,7 @@ public class AuthService {
         return new LoginResponse(accessToken, refreshToken, new UserResponse(user));
     }
 
+    @SuppressWarnings("null")
     private void saveRefreshToken(Long userId, String refreshToken) {
 
         LocalDateTime expiry = LocalDateTime.now().plusDays(14);

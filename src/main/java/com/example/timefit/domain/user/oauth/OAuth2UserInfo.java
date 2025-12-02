@@ -6,8 +6,6 @@ public interface OAuth2UserInfo {
 
     String getProvider();
     String getSocialId();
-    String getNickname();
-    String getProfileImage();
 
     Map<String, Object> getAttributes();
 }
