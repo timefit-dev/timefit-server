@@ -1,8 +1,15 @@
 package com.example.timefit.domain.user.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
 import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "users")
@@ -21,15 +28,15 @@ public class User {
   @Column(nullable = false)
   private String provider;
 
-  @Column(nullable = false)
-  private String nickname;
-
-  @Column
-  private String profileImage;
-
   @Column(updatable = false)
   private LocalDateTime createdAt;
 
   @Column
   private LocalDateTime updatedAt;
+
+  public User(String socialId, String provider) {
+    this.socialId = socialId;
+    this.provider = provider;
+  }
+
 }
