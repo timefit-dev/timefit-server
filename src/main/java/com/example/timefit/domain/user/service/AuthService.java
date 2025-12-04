@@ -28,13 +28,11 @@ public class AuthService {
 
     public LoginResponse socialLogin(String provider, String accessToken) {
 
-        switch (provider.toUpperCase()) {
-            case "KAKAO":
-                return loginWithKakao(accessToken);
+        return switch (provider.toUpperCase()) {
+                case "KAKAO" -> loginWithKakao(accessToken);
+                default -> throw new IllegalArgumentException("Unsupported provider: " + provider);
+        };
 
-            default:
-                throw new IllegalArgumentException("Unsupported provider: " + provider);
-        }
     }
 
     private LoginResponse loginWithKakao(String kakaoAccessToken) {
