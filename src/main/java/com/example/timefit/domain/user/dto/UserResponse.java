@@ -5,11 +5,9 @@ import com.example.timefit.domain.user.entity.User;
 public record UserResponse (
   Long id,
   String socialId,
-  String nickname,
-  String profileImage,
   String provider
 ) {
   public UserResponse(User user) {
-    this(user.getId(), user.getSocialId(), user.getNickname(), user.getProfileImage(), user.getProvider());
+    this(user.getId(), user.getSocialId(), user.getProvider());
   }
 }
