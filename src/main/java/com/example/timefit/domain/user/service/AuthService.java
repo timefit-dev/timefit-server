@@ -35,6 +35,31 @@ public class AuthService {
 
     }
 
+    public LoginResponse reissueAccessToken(String refreshToken) {
+
+        if (!jwtTokenProvider.validateToken(refreshToken)) {
+                throw new IllegalArgumentException("Invalid refresh token");
+        }
+
+        RefreshToken savedToken = refreshTokenRepository
+                .findByToken(refreshToken)
+                .orElseThrow(() -> new IllegalArgumentException("Refresh token not found"));
+
+        Long userId = savedToken.getUserId();
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        String newAccessToken = jwtTokenProvider.createAccessToken(userId);
+
+        return new LoginResponse(
+                newAccessToken,
+                refreshToken,
+                new UserResponse(user)
+        );
+}
+
+
     private LoginResponse loginWithKakao(String kakaoAccessToken) {
 
         KakaoOAuth2UserInfo userInfo = kakaoOAuthService.getUserInfo(kakaoAccessToken);

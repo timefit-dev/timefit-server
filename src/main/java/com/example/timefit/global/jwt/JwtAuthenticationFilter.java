@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.lang.NonNull;
 
-
 import java.io.IOException;
 
 @Slf4j
@@ -25,24 +24,43 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
 
     @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest request,
-                                    @NonNull HttpServletResponse response,
-                                    @NonNull FilterChain filterChain)
-                                    throws ServletException, IOException {
+    protected void doFilterInternal(
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain
+    ) throws ServletException, IOException {
+
+        String requestUri = request.getRequestURI();
+
+        // ✅ 인증 관련 API는 JWT 필터 제외
+        if (requestUri.startsWith("/api/auth")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String token = resolveToken(request);
 
-        if (token != null) {
-            if (jwtTokenProvider.validateToken(token)) {
-                Authentication authentication = jwtTokenProvider.getAuthentication(token);
-
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-
-                log.warn("[JwtAuthenticationFilter] 인증 성공 - userId={}", authentication.getPrincipal());
-            } else {
-                log.warn("[JwtAuthenticationFilter] JWT가 유효하지 않습니다");
-            }
+        // ✅ 토큰이 없으면 그냥 통과 (SecurityConfig에서 막힘)
+        if (token == null) {
+            filterChain.doFilter(request, response);
+            return;
         }
+
+        // ✅ 토큰 검증
+        if (!jwtTokenProvider.validateToken(token)) {
+            log.warn("[JwtAuthenticationFilter] JWT가 유효하지 않습니다");
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // ✅ 인증 객체 생성 및 저장
+        Authentication authentication = jwtTokenProvider.getAuthentication(token);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        log.info(
+                "[JwtAuthenticationFilter] 인증 성공 - userId={}",
+                authentication.getPrincipal()
+        );
 
         filterChain.doFilter(request, response);
     }

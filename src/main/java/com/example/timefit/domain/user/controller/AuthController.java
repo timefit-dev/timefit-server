@@ -24,4 +24,14 @@ public class AuthController {
         );
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResponse> refresh(
+            @RequestHeader("Authorization") String authorization
+    ) {
+        String refreshToken = authorization.substring(7);
+        LoginResponse response = authService.reissueAccessToken(refreshToken);
+        return ResponseEntity.ok(response);
+    }
+
 }
