@@ -1,20 +1,19 @@
 package com.example.timefit.global.jwt;
 
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.lang.NonNull;
 
-import java.io.IOException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -32,7 +31,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String requestUri = request.getRequestURI();
 
-        // ✅ 인증 관련 API는 JWT 필터 제외
         if (requestUri.startsWith("/api/auth")) {
             filterChain.doFilter(request, response);
             return;
@@ -40,20 +38,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = resolveToken(request);
 
-        // ✅ 토큰이 없으면 그냥 통과 (SecurityConfig에서 막힘)
         if (token == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // ✅ 토큰 검증
         if (!jwtTokenProvider.validateToken(token)) {
             log.warn("[JwtAuthenticationFilter] JWT가 유효하지 않습니다");
             filterChain.doFilter(request, response);
             return;
         }
 
-        // ✅ 인증 객체 생성 및 저장
         Authentication authentication = jwtTokenProvider.getAuthentication(token);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
