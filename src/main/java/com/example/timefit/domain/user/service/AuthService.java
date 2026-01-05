@@ -5,6 +5,7 @@ import com.example.timefit.domain.user.entity.RefreshToken;
 import com.example.timefit.domain.user.repository.UserRepository;
 import com.example.timefit.domain.user.repository.RefreshTokenRepository;
 import com.example.timefit.domain.user.oauth.KakaoOAuth2UserInfo;
+import com.example.timefit.domain.user.oauth.GoogleOAuth2UserInfo;
 import com.example.timefit.global.jwt.JwtTokenProvider;
 import com.example.timefit.domain.user.dto.LoginResponse;
 import com.example.timefit.domain.user.dto.UserResponse;
@@ -22,28 +23,54 @@ import java.time.LocalDateTime;
 public class AuthService {
 
     private final KakaoOAuthService kakaoOAuthService;
+    private final GoogleOAuthService googleOAuthService;
+
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
     public LoginResponse socialLogin(String provider, String accessToken) {
-
         return switch (provider.toUpperCase()) {
-                case "KAKAO" -> loginWithKakao(accessToken);
-                default -> throw new IllegalArgumentException("Unsupported provider: " + provider);
+            case "KAKAO" -> loginWithKakao(accessToken);
+            case "GOOGLE" -> loginWithGoogle(accessToken);
+            default -> throw new IllegalArgumentException("Unsupported provider: " + provider);
         };
+    }
 
+    public LoginResponse reissueAccessToken(String refreshToken) {
+
+        if (!jwtTokenProvider.validateToken(refreshToken)) {
+            throw new IllegalArgumentException("Invalid refresh token");
+        }
+
+        RefreshToken savedToken = refreshTokenRepository
+                .findByToken(refreshToken)
+                .orElseThrow(() -> new IllegalArgumentException("Refresh token not found"));
+
+        Long userId = savedToken.getUserId();
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        String newAccessToken = jwtTokenProvider.createAccessToken(userId);
+
+        return new LoginResponse(
+                newAccessToken,
+                refreshToken,
+                new UserResponse(user)
+        );
     }
 
     private LoginResponse loginWithKakao(String kakaoAccessToken) {
 
-        KakaoOAuth2UserInfo userInfo = kakaoOAuthService.getUserInfo(kakaoAccessToken);
+        KakaoOAuth2UserInfo userInfo =
+                kakaoOAuthService.getUserInfo(kakaoAccessToken);
 
         User user = userRepository.findBySocialId(userInfo.getSocialId())
                 .orElseGet(() -> userRepository.save(
                         new User(
                                 userInfo.getSocialId(),
-                                "KAKAO"
+                                userInfo.getProvider()
                         )
                 ));
 
@@ -52,10 +79,38 @@ public class AuthService {
 
         saveRefreshToken(user.getId(), refreshToken);
 
-        return new LoginResponse(accessToken, refreshToken, new UserResponse(user));
+        return new LoginResponse(
+                accessToken,
+                refreshToken,
+                new UserResponse(user)
+        );
     }
 
-    @SuppressWarnings("null")
+    private LoginResponse loginWithGoogle(String googleAccessToken) {
+
+        GoogleOAuth2UserInfo userInfo =
+                googleOAuthService.getUserInfo(googleAccessToken);
+
+        User user = userRepository.findBySocialId(userInfo.getSocialId())
+                .orElseGet(() -> userRepository.save(
+                        new User(
+                                userInfo.getSocialId(),
+                                userInfo.getProvider()
+                        )
+                ));
+
+        String accessToken = jwtTokenProvider.createAccessToken(user.getId());
+        String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
+
+        saveRefreshToken(user.getId(), refreshToken);
+
+        return new LoginResponse(
+                accessToken,
+                refreshToken,
+                new UserResponse(user)
+        );
+    }
+
     private void saveRefreshToken(Long userId, String refreshToken) {
 
         LocalDateTime expiry = LocalDateTime.now().plusDays(14);
@@ -64,11 +119,7 @@ public class AuthService {
                 .ifPresentOrElse(
                         rt -> rt.update(refreshToken, expiry),
                         () -> refreshTokenRepository.save(
-                                RefreshToken.create(
-                                        userId,
-                                        refreshToken,
-                                        expiry
-                                )
+                                RefreshToken.create(userId, refreshToken, expiry)
                         )
                 );
     }
