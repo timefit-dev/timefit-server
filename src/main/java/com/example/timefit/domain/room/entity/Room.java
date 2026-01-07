@@ -27,7 +27,7 @@ public class Room {
     @Column(name = "title", length = 100, nullable = false)
     private String title;
 
-    @Column(name = "invite_code", length = 10, nullable = false, unique = true)
+    @Column(name = "invite_code", length = 36, nullable = false, unique = true)
     private String inviteCode;
 
     @ManyToOne(fetch = FetchType.LAZY)
