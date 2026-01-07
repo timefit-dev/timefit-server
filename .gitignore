@@ -38,3 +38,5 @@ logs/
 *.swp
 *.swo
 *~
+
+.env

@@ -36,6 +36,8 @@ services:
 
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
 
+      KAKAO_CLIENT_ID: ${KAKAO_CLIENT_ID}
+
       JWT_SECRET: ${JWT_SECRET}
       TZ: Asia/Seoul
 
