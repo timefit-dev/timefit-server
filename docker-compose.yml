@@ -8,11 +8,11 @@ services:
     ports:
       - "3306:3306"
     environment:
-      MYSQL_DATABASE: timefit
-      MYSQL_ROOT_PASSWORD: timefit0000
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
 
-      MYSQL_USER: timefit-username
-      MYSQL_PASSWORD: 0000
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
 
       TZ: Asia/Seoul
     volumes:
@@ -30,13 +30,13 @@ services:
     depends_on:
       - db
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/timefit?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-      SPRING_DATASOURCE_USERNAME: timefit-username
-      SPRING_DATASOURCE_PASSWORD: 0000
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE}?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
 
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
 
-      JWT_SECRET: b76132d7536189dbcacf214205491559e011db8f979eea8ea2149c78c7a96869
+      JWT_SECRET: ${JWT_SECRET}
       TZ: Asia/Seoul
 
 volumes:
