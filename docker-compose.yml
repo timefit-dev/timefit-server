@@ -36,6 +36,7 @@ services:
 
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
 
+      JWT_SECRET: b76132d7536189dbcacf214205491559e011db8f979eea8ea2149c78c7a96869
       TZ: Asia/Seoul
 
 volumes:
