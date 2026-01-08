@@ -30,6 +30,10 @@ public class RoomService {
 
     @Transactional
     public RoomResponse createRoom(RoomCreateRequest request, User owner) {
+        if (owner == null) {
+            throw new IllegalArgumentException("방을 생성할 사용자(Owner) 정보가 없습니다.");
+        }
+
         String newInviteCode = UUID.randomUUID().toString();
 
         LocalTime startTime = parseTime(request.getStartTime());
@@ -62,7 +66,9 @@ public class RoomService {
 
     @Transactional
     public RoomResponse updateRoom(Long roomId, RoomUpdateRequest request, User user) {
-        Room room = findRoomById(roomId);
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 방입니다."));
+
         room.validateOwner(user);
 
         room.updateTitle(request.getTitle());

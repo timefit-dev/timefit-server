@@ -47,10 +47,30 @@ public record RoomResponse(
     private static List<String> generateTimeList(LocalTime startTime, LocalTime endTime) {
         List<String> timelist = new ArrayList<>();
 
+        if (startTime.isAfter(endTime)) {
+            return timelist;
+        }
+
         LocalTime current = startTime;
+
+        int safetyCounter = 0;
+
         while (!current.isAfter(endTime)) {
             timelist.add(current.format(TIME_FORMATTER));
-            current = current.plusHours(1);
+
+            LocalTime next = current.plusHours(1);
+
+            if (next.isBefore(current)) {
+                timelist.add("24:00");
+                break;
+            }
+
+            if (safetyCounter++ > 24) {
+                timelist.add("24:00");
+                break;
+            }
+
+            current = next;
         }
 
         return timelist;
