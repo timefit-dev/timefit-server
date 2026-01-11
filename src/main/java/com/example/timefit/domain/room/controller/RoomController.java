@@ -5,7 +5,6 @@ import com.example.timefit.domain.room.dto.RoomDeleteMessage;
 import com.example.timefit.domain.room.dto.RoomResponse;
 import com.example.timefit.domain.room.dto.RoomUpdateRequest;
 import com.example.timefit.domain.room.service.RoomService;
-import com.example.timefit.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,10 +22,10 @@ public class RoomController {
     @PostMapping
     public ResponseEntity<RoomResponse> createRoom(
             @RequestBody RoomCreateRequest request,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal Long userId
     ) {
-        RoomResponse responseDTO = roomService.createRoom(request, user);
-        return ResponseEntity.ok(responseDTO);
+        RoomResponse response = roomService.createRoom(request, userId);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
@@ -39,18 +38,18 @@ public class RoomController {
     public ResponseEntity<RoomResponse> updateRoom(
             @PathVariable Long roomId,
             @RequestBody RoomUpdateRequest request,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal Long userId
     ) {
-        RoomResponse responseDTO = roomService.updateRoom(roomId, request, user);
+        RoomResponse responseDTO = roomService.updateRoom(roomId, request, userId);
         return ResponseEntity.ok(responseDTO);
     }
 
     @DeleteMapping("/{roomId}")
     public ResponseEntity<RoomDeleteMessage> delete(
             @PathVariable Long roomId,
-            @AuthenticationPrincipal User user
+            @AuthenticationPrincipal Long userId
     ) {
-        RoomDeleteMessage response = roomService.delete(roomId, user);
+        RoomDeleteMessage response = roomService.delete(roomId, userId);
         return ResponseEntity.ok(response);
     }
 }
