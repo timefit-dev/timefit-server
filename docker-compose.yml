@@ -24,6 +24,8 @@ services:
   app:
     build: .
     container_name: timefit-app
+    env_file:
+      - .env
     restart: on-failure
     ports:
       - "8080:8080"
