@@ -10,6 +10,7 @@ import com.example.timefit.domain.room.entity.Room;
 import com.example.timefit.domain.room.entity.RoomDate;
 import com.example.timefit.domain.room.repository.RoomRepository;
 import com.example.timefit.domain.user.entity.User;
+import com.example.timefit.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -27,12 +27,12 @@ import java.util.stream.Collectors;
 public class RoomService {
 
     private final RoomRepository roomRepository;
+    private final UserRepository userRepository;
 
     @Transactional
-    public RoomResponse createRoom(RoomCreateRequest request, User owner) {
-        if (owner == null) {
-            throw new IllegalArgumentException("방을 생성할 사용자(Owner) 정보가 없습니다.");
-        }
+    public RoomResponse createRoom(RoomCreateRequest request, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("없는 유저입니다."));
 
         String newInviteCode = UUID.randomUUID().toString();
 
@@ -42,7 +42,7 @@ public class RoomService {
         Room room = new Room(
                 request.getTitle(),
                 newInviteCode,
-                owner,
+                user,
                 startTime,
                 endTime
         );
@@ -65,9 +65,12 @@ public class RoomService {
     }
 
     @Transactional
-    public RoomResponse updateRoom(Long roomId, RoomUpdateRequest request, User user) {
+    public RoomResponse updateRoom(Long roomId, RoomUpdateRequest request, Long userId) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 방입니다."));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("없는 유저입니다."));
 
         room.validateOwner(user);
 
@@ -85,7 +88,10 @@ public class RoomService {
     }
 
     @Transactional
-    public RoomDeleteMessage delete(Long roomId, User user) {
+    public RoomDeleteMessage delete(Long roomId, Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("없는 유저입니다."));
+
         Room room = findRoomById(roomId);
         room.validateOwner(user);
         roomRepository.delete(room);
