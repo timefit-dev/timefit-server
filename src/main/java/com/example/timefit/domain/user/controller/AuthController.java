@@ -8,6 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Map;
+import java.util.HashMap;
+import java.time.Instant;
 
 @Slf4j
 @RestController
@@ -34,6 +37,23 @@ public class AuthController {
     ) {
         String refreshToken = authorization.substring(7);
         LoginResponse response = authService.reissueAccessToken(refreshToken);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, Object>> logout(
+            @RequestHeader("Authorization") String authorization
+    ) {
+        String accessToken = authorization.substring(7);
+
+        log.info("[AuthController] /api/auth/logout 호출됨");
+
+        authService.logout(accessToken);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Logout successful");
+        response.put("timestamp", Instant.now().toString());
+
         return ResponseEntity.ok(response);
     }
 
