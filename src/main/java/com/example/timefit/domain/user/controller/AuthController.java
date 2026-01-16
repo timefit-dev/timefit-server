@@ -2,14 +2,13 @@ package com.example.timefit.domain.user.controller;
 
 import com.example.timefit.domain.user.dto.LoginRequest;
 import com.example.timefit.domain.user.dto.LoginResponse;
+import com.example.timefit.domain.user.dto.LogoutResponse;
 import com.example.timefit.domain.user.service.AuthService;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.Map;
-import java.util.HashMap;
 import java.time.Instant;
 
 @Slf4j
@@ -41,20 +40,21 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Map<String, Object>> logout(
-            @RequestHeader("Authorization") String authorization
+    public ResponseEntity<LogoutResponse> logout(
+            @RequestHeader("Authorization") String token
     ) {
-        String accessToken = authorization.substring(7);
+        String accessToken = token.substring(7);
 
         log.info("[AuthController] /api/auth/logout 호출됨");
 
         authService.logout(accessToken);
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Logout successful");
-        response.put("timestamp", Instant.now().toString());
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(
+            new LogoutResponse(
+                "Logout successful",
+                Instant.now()
+            )
+        );
     }
 
 }

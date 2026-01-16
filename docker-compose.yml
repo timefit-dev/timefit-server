@@ -22,8 +22,10 @@ services:
       --collation-server=utf8mb4_unicode_ci
 
   app:
-    build: .
+    image: ${DOCKER_USERNAME}/timefit-server:latest
     container_name: timefit-app
+    env_file:
+      - .env
     restart: on-failure
     ports:
       - "8080:8080"
