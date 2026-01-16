@@ -78,14 +78,17 @@ public class AuthService {
 
     private LoginResponse loginWithKakao(String kakaoAccessToken) {
 
+        log.info("[AuthService] loginWithKakao start");
+
         KakaoOAuth2UserInfo userInfo =
                 kakaoOAuthService.getUserInfo(kakaoAccessToken);
-
+        
         User user = userRepository.findBySocialId(userInfo.getSocialId())
                 .orElseGet(() -> userRepository.save(
                         new User(
                                 userInfo.getSocialId(),
-                                userInfo.getProvider()
+                                userInfo.getProvider(),
+                                userInfo.getNickname()
                         )
                 ));
 
@@ -110,7 +113,8 @@ public class AuthService {
                 .orElseGet(() -> userRepository.save(
                         new User(
                                 userInfo.getSocialId(),
-                                userInfo.getProvider()
+                                userInfo.getProvider(),
+                                userInfo.getNickname()
                         )
                 ));
 
