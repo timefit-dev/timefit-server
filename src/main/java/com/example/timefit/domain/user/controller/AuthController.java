@@ -2,12 +2,14 @@ package com.example.timefit.domain.user.controller;
 
 import com.example.timefit.domain.user.dto.LoginRequest;
 import com.example.timefit.domain.user.dto.LoginResponse;
+import com.example.timefit.domain.user.dto.LogoutResponse;
 import com.example.timefit.domain.user.service.AuthService;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.time.Instant;
 
 @Slf4j
 @RestController
@@ -35,6 +37,24 @@ public class AuthController {
         String refreshToken = authorization.substring(7);
         LoginResponse response = authService.reissueAccessToken(refreshToken);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<LogoutResponse> logout(
+            @RequestHeader("Authorization") String token
+    ) {
+        String accessToken = token.substring(7);
+
+        log.info("[AuthController] /api/auth/logout 호출됨");
+
+        authService.logout(accessToken);
+
+        return ResponseEntity.ok(
+            new LogoutResponse(
+                "Logout successful",
+                Instant.now()
+            )
+        );
     }
 
 }

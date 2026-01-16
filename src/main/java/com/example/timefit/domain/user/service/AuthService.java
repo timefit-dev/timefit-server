@@ -9,6 +9,7 @@ import com.example.timefit.domain.user.oauth.GoogleOAuth2UserInfo;
 import com.example.timefit.global.jwt.JwtTokenProvider;
 import com.example.timefit.domain.user.dto.LoginResponse;
 import com.example.timefit.domain.user.dto.UserResponse;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -59,6 +60,20 @@ public class AuthService {
                 refreshToken,
                 new UserResponse(user)
         );
+    }
+
+    @Transactional
+    public void logout(String accessToken) {
+
+        if(!jwtTokenProvider.validateToken(accessToken)) {
+                throw new IllegalArgumentException("Invalid access token");
+        }
+
+        Long userId = jwtTokenProvider.getUserId(accessToken);
+
+        refreshTokenRepository.deleteByUserId(userId);
+
+        log.info("[AuthService] 로그아웃 완료 - userId={}", userId);
     }
 
     private LoginResponse loginWithKakao(String kakaoAccessToken) {
