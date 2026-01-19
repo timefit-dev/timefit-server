@@ -46,16 +46,16 @@ public class User {
     this.nickname = nickname;
   }
 
-  public void updateProfile(String nickname, String profileImageUrl) {
+  public void updateNickname(String nickname) {
     if (nickname == null || nickname.isBlank()) {
-        throw new IllegalArgumentException("nickname은 필수입니다.");
+      throw new IllegalArgumentException("nickname은 필수입니다.");
     }
     this.nickname = nickname;
+    this.updatedAt = LocalDateTime.now();
+  }
 
-    if (profileImageUrl != null) {
-      this.profileImageUrl = profileImageUrl;
-    }
-
+  public void updateProfileImage(String profileImageUrl) {
+    this.profileImageUrl = profileImageUrl;
     this.updatedAt = LocalDateTime.now();
   }
 

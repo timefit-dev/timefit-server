@@ -38,8 +38,15 @@ public class UserController {
     ) {
         Long userId = Long.valueOf(authentication.getName());
 
-        User updatedUser = userService.updateMyInfo(userId, request);
+        if(request.nickname() != null) {
+            userService.updateNickname(userId, request.nickname());
+        }
 
-        return ResponseEntity.ok(new UserResponse(updatedUser));
+        if(request.profileImageUrl() != null) {
+            userService.updateProfileImage(userId, request.profileImageUrl());
+        }
+
+        User user = userService.getUserById(userId);
+        return ResponseEntity.ok(new UserResponse(user));
     }
 }

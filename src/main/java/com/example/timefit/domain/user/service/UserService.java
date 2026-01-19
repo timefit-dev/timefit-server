@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 
 import com.example.timefit.domain.user.entity.User;
 import com.example.timefit.domain.user.repository.UserRepository;
-import com.example.timefit.domain.user.dto.UserUpdateRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
@@ -23,14 +22,16 @@ public class UserService {
     }
 
     @Transactional
-    public User updateMyInfo(Long userId, UserUpdateRequest request) {
+    public User updateNickname(Long userId, String nickname) {
         User user = getUserById(userId);
+        user.updateNickname(nickname);
+        return user;
+    }
 
-        user.updateProfile(
-            request.nickname(),
-            request.profileImageUrl()
-        );
-
+    @Transactional
+    public User updateProfileImage(Long userId, String profileImageUrl) {
+        User user = getUserById(userId);
+        user.updateProfileImage(profileImageUrl);
         return user;
     }
 }
