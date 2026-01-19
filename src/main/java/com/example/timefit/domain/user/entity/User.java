@@ -28,15 +28,35 @@ public class User {
   @Column(nullable = false)
   private String provider;
 
+  @Column(nullable = false)
+  private String nickname;
+
+  @Column
+  private String profileImageUrl;
+
   @Column(updatable = false)
   private LocalDateTime createdAt;
 
   @Column
   private LocalDateTime updatedAt;
 
-  public User(String socialId, String provider) {
+  public User(String socialId, String provider, String nickname) {
     this.socialId = socialId;
     this.provider = provider;
+    this.nickname = nickname;
+  }
+
+  public void updateNickname(String nickname) {
+    if (nickname == null || nickname.isBlank()) {
+      throw new IllegalArgumentException("nickname은 필수입니다.");
+    }
+    this.nickname = nickname;
+    this.updatedAt = LocalDateTime.now();
+  }
+
+  public void updateProfileImage(String profileImageUrl) {
+    this.profileImageUrl = profileImageUrl;
+    this.updatedAt = LocalDateTime.now();
   }
 
 }
