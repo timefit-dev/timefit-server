@@ -2,6 +2,7 @@ package com.example.timefit.domain.room.dto;
 
 import com.example.timefit.domain.room.entity.Room;
 import com.example.timefit.domain.room.entity.RoomDate;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -13,7 +14,7 @@ import java.util.stream.Collectors;
 public record RoomResponse(
         String id,
         String title,
-        String invitecode,
+        String inviteCode,
         String owner,
         List<LocalDate> dates,
         LocalTime startTime,
