@@ -39,7 +39,6 @@ public class RoomController {
             @PathVariable String inviteCode,
             @AuthenticationPrincipal Long userId
     ) {
-        System.out.println("초대 코드 요청 들어옴: " + inviteCode);
         RoomResponse response = roomService.getRoomByInviteCode(inviteCode, userId);
         return ResponseEntity.ok(response);
     }
