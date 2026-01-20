@@ -99,6 +99,20 @@ public class RoomService {
         return new RoomDeleteMessage("방 삭제 성공");
     }
 
+    @Transactional(readOnly = true)
+    public RoomResponse getRoomByInviteCode(String inviteCode, Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("없는 유저입니다."));
+
+        Room room = roomRepository.findByInviteCode(inviteCode);
+
+        if (room == null) {
+            throw new CustomException(ErrorCode.ROOM_NOT_FOUND);
+        }
+
+        return new RoomResponse(room);
+    }
+
     private Room findRoomById(Long roomId) {
         return roomRepository.findById(roomId)
                 .orElseThrow(() -> new CustomException(ErrorCode.ROOM_NOT_FOUND));
