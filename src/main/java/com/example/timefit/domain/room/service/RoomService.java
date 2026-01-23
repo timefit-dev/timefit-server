@@ -32,7 +32,7 @@ public class RoomService {
     @Transactional
     public RoomResponse createRoom(RoomCreateRequest request, Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("없는 유저입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         String newInviteCode = UUID.randomUUID().toString();
 
@@ -67,10 +67,10 @@ public class RoomService {
     @Transactional
     public RoomResponse updateRoom(Long roomId, RoomUpdateRequest request, Long userId) {
         Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 방입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.ROOM_NOT_FOUND));
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("없는 유저입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         room.validateOwner(user);
 
@@ -90,7 +90,7 @@ public class RoomService {
     @Transactional
     public RoomDeleteMessage delete(Long roomId, Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("없는 유저입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         Room room = findRoomById(roomId);
         room.validateOwner(user);
@@ -102,13 +102,10 @@ public class RoomService {
     @Transactional(readOnly = true)
     public RoomResponse getRoomByInviteCode(String inviteCode, Long userId) {
         userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("없는 유저입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        Room room = roomRepository.findByInviteCode(inviteCode);
-
-        if (room == null) {
-            throw new CustomException(ErrorCode.ROOM_NOT_FOUND);
-        }
+        Room room = roomRepository.findByInviteCode(inviteCode)
+                .orElseThrow(() -> new CustomException(ErrorCode.ROOM_NOT_FOUND));
 
         return new RoomResponse(room);
     }
