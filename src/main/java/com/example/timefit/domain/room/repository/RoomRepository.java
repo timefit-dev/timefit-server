@@ -7,5 +7,5 @@ import java.util.Optional;
 
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Long> {
-    Room findByInviteCode(String inviteCode);
+    Optional<Room> findByInviteCode(String inviteCode);
 }
