@@ -4,6 +4,7 @@ import com.example.timefit.domain.user.entity.User;
 import com.example.timefit.domain.user.entity.RefreshToken;
 import com.example.timefit.domain.user.repository.UserRepository;
 import com.example.timefit.domain.user.repository.RefreshTokenRepository;
+import com.example.timefit.domain.user.oauth.AppleOAuth2UserInfo;
 import com.example.timefit.domain.user.oauth.KakaoOAuth2UserInfo;
 import com.example.timefit.domain.user.oauth.GoogleOAuth2UserInfo;
 import com.example.timefit.global.jwt.JwtTokenProvider;
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +27,7 @@ public class AuthService {
 
     private final KakaoOAuthService kakaoOAuthService;
     private final GoogleOAuthService googleOAuthService;
+    private final AppleOAuthService appleOAuthService;
 
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -34,6 +37,7 @@ public class AuthService {
         return switch (provider.toUpperCase()) {
             case "KAKAO" -> loginWithKakao(accessToken);
             case "GOOGLE" -> loginWithGoogle(accessToken);
+            case "APPLE" -> loginWithApple(accessToken);
             default -> throw new IllegalArgumentException("Unsupported provider: " + provider);
         };
     }
@@ -128,6 +132,36 @@ public class AuthService {
                 refreshToken,
                 new UserResponse(user)
         );
+    }
+
+    private LoginResponse loginWithApple(String identityToken) {
+
+        AppleOAuth2UserInfo userInfo =
+                appleOAuthService.getUserInfo(identityToken);
+
+        User user = userRepository.findBySocialId(userInfo.getSocialId())
+                .orElseGet(() -> userRepository.save(
+                        new User(
+                                userInfo.getSocialId(),
+                                userInfo.getProvider(),
+                                generateDefaultNickname()
+                        )
+                ));
+
+        String accessToken = jwtTokenProvider.createAccessToken(user.getId());
+        String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
+
+        saveRefreshToken(user.getId(), refreshToken);
+
+        return new LoginResponse(
+                accessToken,
+                refreshToken,
+                new UserResponse(user)
+        );
+    }
+
+    private String generateDefaultNickname() {
+        return "사용자_" + UUID.randomUUID().toString().substring(0, 8);
     }
 
     private void saveRefreshToken(Long userId, String refreshToken) {
