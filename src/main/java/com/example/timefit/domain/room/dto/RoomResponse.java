@@ -45,7 +45,7 @@ public record RoomResponse(
         );
     }
 
-    private static List<String> generateTimeList(LocalTime startTime, LocalTime endTime) {
+    public static List<String> generateTimeList(LocalTime startTime, LocalTime endTime) {
         List<String> timelist = new ArrayList<>();
 
         if (startTime.isAfter(endTime)) {

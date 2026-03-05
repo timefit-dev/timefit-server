@@ -6,11 +6,14 @@ import com.example.timefit.domain.room.dto.RoomCreateRequest;
 import com.example.timefit.domain.room.dto.RoomDeleteMessage;
 import com.example.timefit.domain.room.dto.RoomResponse;
 import com.example.timefit.domain.room.dto.RoomUpdateRequest;
+import com.example.timefit.domain.room.entity.Participant;
 import com.example.timefit.domain.room.entity.Room;
 import com.example.timefit.domain.room.entity.RoomDate;
 import com.example.timefit.domain.room.repository.RoomRepository;
 import com.example.timefit.domain.user.entity.User;
 import com.example.timefit.domain.user.repository.UserRepository;
+import com.example.timefit.domain.room.dto.RoomDetailResponse;
+import com.example.timefit.domain.room.repository.ParticipantRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +31,7 @@ public class RoomService {
 
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
+    private final ParticipantRepository participantRepository;
 
     @Transactional
     public RoomResponse createRoom(RoomCreateRequest request, Long userId) {
@@ -117,11 +121,48 @@ public class RoomService {
 
     private LocalTime parseTime(String timeString) {
         if (timeString == null || timeString.isBlank()) {
-            return null;
+            throw new IllegalArgumentException("startTime/endTime은 필수입니다.");
         }
         if ("24:00".equals(timeString)) {
             return LocalTime.of(23, 59);
         }
         return LocalTime.parse(timeString, DateTimeFormatter.ofPattern("HH:mm"));
+    }
+
+    @Transactional(readOnly = true)
+    public RoomDetailResponse getRoomDetail(Long roomId, Long userId) {
+
+        userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ROOM_NOT_FOUND));
+
+        boolean isOwner = room.getOwner().getId().equals(userId);
+
+        boolean hasResponded = participantRepository.findByRoom_IdAndUser_Id(roomId, userId)
+                .map(Participant::isHasResponded) // Lombok getter 이름이 다르면 아래 참고
+                .orElse(false);
+
+        long totalParticipants = participantRepository.countByRoom_Id(roomId);
+        long respondedCount = participantRepository.countByRoom_IdAndHasRespondedTrue(roomId);
+
+        List<String> dates = room.getDates().stream()
+                .map(rd -> rd.getDate().toString())
+                .sorted()
+                .toList();
+
+        List<String> timeSlots = RoomResponse.generateTimeList(room.getStartTime(), room.getEndTime());
+
+        return new RoomDetailResponse(
+                room.getId(),
+                room.getTitle(),
+                dates,
+                timeSlots,
+                isOwner,
+                hasResponded,
+                totalParticipants,
+                respondedCount
+        );
     }
 }
