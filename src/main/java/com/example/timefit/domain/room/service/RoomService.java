@@ -141,7 +141,7 @@ public class RoomService {
         boolean isOwner = room.getOwner().getId().equals(userId);
 
         boolean hasResponded = participantRepository.findByRoom_IdAndUser_Id(roomId, userId)
-                .map(Participant::isHasResponded) // Lombok getter 이름이 다르면 아래 참고
+                .map(Participant::isHasResponded)
                 .orElse(false);
 
         long totalParticipants = participantRepository.countByRoom_Id(roomId);

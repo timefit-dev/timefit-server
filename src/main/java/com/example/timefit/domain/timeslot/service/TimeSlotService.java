@@ -45,10 +45,11 @@ public class TimeSlotService {
 
         timeSlotRepository.deleteByParticipantId(participant.getId());
 
-        List<LocalDateTime> availableSlots =
-                (request == null || request.availableSlots() == null)
-                        ? Collections.emptyList()
-                        : request.availableSlots();
+        List<LocalDateTime> availableSlots = Collections.emptyList();
+
+        if (request.availableSlots() != null) {
+            availableSlots = request.availableSlots();
+        }
 
         List<TimeSlot> toSave = availableSlots.stream()
                 .filter(Objects::nonNull)
@@ -76,8 +77,13 @@ public class TimeSlotService {
 
         AggregationResult agg = aggregate(roomId);
 
-        List<String> best = agg.bestSlots().stream().map(LocalDateTime::toString).toList();
-        List<String> last = agg.lastSlots().stream().map(LocalDateTime::toString).toList();
+        List<String> best = agg.bestSlots().stream()
+                .map(LocalDateTime::toString)
+                .toList();
+
+        List<String> last = agg.lastSlots().stream()
+                .map(LocalDateTime::toString)
+                .toList();
 
         List<TimeSlotResultsResponse.SlotCount> slotCounts = agg.counts().entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
@@ -121,19 +127,19 @@ public class TimeSlotService {
         List<TimeSlotDetailResponse.PersonInfo> availablePeople = allParticipants.stream()
                 .filter(p -> availableParticipantIds.contains(p.getId()))
                 .map(p -> new TimeSlotDetailResponse.PersonInfo(
-                        p.getUser().getId(),
-                        p.getUser().getNickname(),
-                        p.getUser().getProfileImageUrl()
-                ))
+                p.getUser().getId(),
+                p.getUser().getNickname(),
+                p.getUser().getProfileImageUrl()
+        ))
                 .toList();
 
         List<TimeSlotDetailResponse.PersonInfo> unavailablePeople = allParticipants.stream()
                 .filter(p -> !availableParticipantIds.contains(p.getId()))
                 .map(p -> new TimeSlotDetailResponse.PersonInfo(
-                        p.getUser().getId(),
-                        p.getUser().getNickname(),
-                        p.getUser().getProfileImageUrl()
-                ))
+                p.getUser().getId(),
+                p.getUser().getNickname(),
+                p.getUser().getProfileImageUrl()
+        ))
                 .toList();
 
         return new TimeSlotDetailResponse(
@@ -148,52 +154,63 @@ public class TimeSlotService {
 
         List<TimeSlot> roomSlots = timeSlotRepository.findByParticipantRoomId(roomId);
 
-        Map<LocalDateTime, Set<Long>> dtToParticipantIds = new HashMap<>();
+        Map<LocalDateTime, Set<Long>> timeToParticipantIds = new HashMap<>();
 
-        for (TimeSlot ts : roomSlots) {
-            if (!ts.isAvailable()) continue;
+        for (TimeSlot slot : roomSlots) {
+            if (!slot.isAvailable()) {
+                continue;
+            }
 
-            LocalDateTime dt = ts.getDateTime();
-            Long participantId = ts.getParticipant().getId();
+            LocalDateTime time = slot.getDateTime();
+            Long participantId = slot.getParticipant().getId();
 
-            dtToParticipantIds
-                    .computeIfAbsent(dt, k -> new HashSet<>())
+            timeToParticipantIds
+                    .computeIfAbsent(time, key -> new HashSet<>())
                     .add(participantId);
         }
 
-        if (dtToParticipantIds.isEmpty()) {
-          return new AggregationResult(List.of(), List.of(), Map.of());
+        if (timeToParticipantIds.isEmpty()) {
+            return new AggregationResult(List.of(), List.of(), Map.of());
         }
 
-        Map<LocalDateTime, Integer> dtToCount = dtToParticipantIds.entrySet().stream()
+        Map<LocalDateTime, Integer> timeToCount = timeToParticipantIds.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         e -> e.getValue().size()
                 ));
 
-        int max = dtToCount.values().stream().max(Integer::compareTo).orElse(0);
+        int max = timeToCount.values().stream()
+                .max(Integer::compareTo)
+                .orElse(0);
 
-        List<LocalDateTime> bestSlots = dtToCount.entrySet().stream()
+        List<LocalDateTime> bestSlots = timeToCount.entrySet().stream()
                 .filter(e -> e.getValue() == max)
                 .map(Map.Entry::getKey)
                 .sorted()
                 .toList();
 
         int second = max - 1;
-        List<LocalDateTime> lastSlots = (second <= 0)
-                ? List.of()
-                : dtToCount.entrySet().stream()
-                .filter(e -> e.getValue() == second)
-                .map(Map.Entry::getKey)
-                .sorted()
-                .toList();
 
-        return new AggregationResult(bestSlots, lastSlots, dtToCount);
+        List<LocalDateTime> lastSlots;
+
+        if (second <= 0) {
+            lastSlots = List.of();
+        } else {
+            lastSlots = timeToCount.entrySet().stream()
+                    .filter(e -> e.getValue() == second)
+                    .map(Map.Entry::getKey)
+                    .sorted()
+                    .toList();
+        }
+
+        return new AggregationResult(bestSlots, lastSlots, timeToCount);
     }
 
     private record AggregationResult(
             List<LocalDateTime> bestSlots,
             List<LocalDateTime> lastSlots,
             Map<LocalDateTime, Integer> counts
-    ) {}
+            ) {
+
+    }
 }
