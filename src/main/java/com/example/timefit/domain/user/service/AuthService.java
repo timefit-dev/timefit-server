@@ -35,10 +35,14 @@ public class AuthService {
 
     public LoginResponse socialLogin(String provider, String accessToken) {
         return switch (provider.toUpperCase()) {
-            case "KAKAO" -> loginWithKakao(accessToken);
-            case "GOOGLE" -> loginWithGoogle(accessToken);
-            case "APPLE" -> loginWithApple(accessToken);
-            default -> throw new IllegalArgumentException("Unsupported provider: " + provider);
+            case "KAKAO" ->
+                loginWithKakao(accessToken);
+            case "GOOGLE" ->
+                loginWithGoogle(accessToken);
+            case "APPLE" ->
+                loginWithApple(accessToken);
+            default ->
+                throw new IllegalArgumentException("Unsupported provider: " + provider);
         };
     }
 
@@ -69,8 +73,8 @@ public class AuthService {
     @Transactional
     public void logout(String accessToken) {
 
-        if(!jwtTokenProvider.validateToken(accessToken)) {
-                throw new IllegalArgumentException("Invalid access token");
+        if (!jwtTokenProvider.validateToken(accessToken)) {
+            throw new IllegalArgumentException("Invalid access token");
         }
 
         Long userId = jwtTokenProvider.getUserId(accessToken);
@@ -84,17 +88,17 @@ public class AuthService {
 
         log.info("[AuthService] loginWithKakao start");
 
-        KakaoOAuth2UserInfo userInfo =
-                kakaoOAuthService.getUserInfo(kakaoAccessToken);
-        
+        KakaoOAuth2UserInfo userInfo
+                = kakaoOAuthService.getUserInfo(kakaoAccessToken);
+
         User user = userRepository.findBySocialId(userInfo.getSocialId())
                 .orElseGet(() -> userRepository.save(
-                        new User(
-                                userInfo.getSocialId(),
-                                userInfo.getProvider(),
-                                userInfo.getNickname()
-                        )
-                ));
+                new User(
+                        userInfo.getSocialId(),
+                        userInfo.getProvider(),
+                        userInfo.getNickname()
+                )
+        ));
 
         String accessToken = jwtTokenProvider.createAccessToken(user.getId());
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
@@ -110,17 +114,17 @@ public class AuthService {
 
     private LoginResponse loginWithGoogle(String googleAccessToken) {
 
-        GoogleOAuth2UserInfo userInfo =
-                googleOAuthService.getUserInfo(googleAccessToken);
+        GoogleOAuth2UserInfo userInfo
+                = googleOAuthService.getUserInfo(googleAccessToken);
 
         User user = userRepository.findBySocialId(userInfo.getSocialId())
                 .orElseGet(() -> userRepository.save(
-                        new User(
-                                userInfo.getSocialId(),
-                                userInfo.getProvider(),
-                                userInfo.getNickname()
-                        )
-                ));
+                new User(
+                        userInfo.getSocialId(),
+                        userInfo.getProvider(),
+                        userInfo.getNickname()
+                )
+        ));
 
         String accessToken = jwtTokenProvider.createAccessToken(user.getId());
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
@@ -136,17 +140,17 @@ public class AuthService {
 
     private LoginResponse loginWithApple(String identityToken) {
 
-        AppleOAuth2UserInfo userInfo =
-                appleOAuthService.getUserInfo(identityToken);
+        AppleOAuth2UserInfo userInfo
+                = appleOAuthService.getUserInfo(identityToken);
 
         User user = userRepository.findBySocialId(userInfo.getSocialId())
                 .orElseGet(() -> userRepository.save(
-                        new User(
-                                userInfo.getSocialId(),
-                                userInfo.getProvider(),
-                                generateDefaultNickname()
-                        )
-                ));
+                new User(
+                        userInfo.getSocialId(),
+                        userInfo.getProvider(),
+                        generateDefaultNickname()
+                )
+        ));
 
         String accessToken = jwtTokenProvider.createAccessToken(user.getId());
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());

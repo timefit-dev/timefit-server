@@ -34,8 +34,8 @@ public class JwtTokenProvider implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-      this.key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
-      log.info("[JwtTokenProvider] Key initialized successfully.");
+        this.key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+        log.info("[JwtTokenProvider] Key initialized successfully.");
     }
 
     public String createAccessToken(Long id) {
@@ -95,7 +95,7 @@ public class JwtTokenProvider implements InitializingBean {
         } catch (Exception e) {
             log.warn("[JwtTokenProvider] 토큰 검증 실패", e);
         }
-        
+
         return false;
     }
 

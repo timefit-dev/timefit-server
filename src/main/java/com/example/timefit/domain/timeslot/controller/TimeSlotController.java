@@ -23,8 +23,8 @@ public class TimeSlotController {
             @RequestBody TimeSlotRequest request
     ) {
 
-        TimeSlotResultsResponse response =
-                timeSlotService.submit(roomId, userId, request);
+        TimeSlotResultsResponse response
+                = timeSlotService.submit(roomId, userId, request);
 
         return ResponseEntity.ok(response);
     }

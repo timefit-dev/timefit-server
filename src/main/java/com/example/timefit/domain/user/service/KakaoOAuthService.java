@@ -24,12 +24,13 @@ public class KakaoOAuthService {
 
         HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<Map<String, Object>> response =
-                restTemplate.exchange(
+        ResponseEntity<Map<String, Object>> response
+                = restTemplate.exchange(
                         "https://kapi.kakao.com/v2/user/me",
                         HttpMethod.GET,
                         entity,
-                        new ParameterizedTypeReference<Map<String, Object>>() {}
+                        new ParameterizedTypeReference<Map<String, Object>>() {
+                }
                 );
 
         log.info("[KakaoOAuthService] 카카오 사용자 정보 조회 성공");

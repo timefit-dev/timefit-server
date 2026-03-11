@@ -25,12 +25,13 @@ public class GoogleOAuthService {
 
         HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<Map<String, Object>> response =
-                restTemplate.exchange(
+        ResponseEntity<Map<String, Object>> response
+                = restTemplate.exchange(
                         "https://www.googleapis.com/oauth2/v3/userinfo",
                         HttpMethod.GET,
                         entity,
-                        new ParameterizedTypeReference<Map<String, Object>>() {}
+                        new ParameterizedTypeReference<Map<String, Object>>() {
+                }
                 );
 
         log.info("[GoogleOAuthService] 구글 사용자 정보 조회 성공");
