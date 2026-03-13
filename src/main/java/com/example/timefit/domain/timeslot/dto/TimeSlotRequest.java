@@ -4,7 +4,5 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record TimeSlotRequest(
-        List<LocalDateTime> availableSlots
-        ) {
-
-}
+    List<LocalDateTime> availableSlots
+) {}

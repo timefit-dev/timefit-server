@@ -12,36 +12,36 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public record RoomResponse(
-        String id,
-        String title,
-        String inviteCode,
-        String owner,
-        List<LocalDate> dates,
-        LocalTime startTime,
-        LocalTime endTime,
-        List<String> timelist,
-        String createdAt,
-        String updatedAt,
-        String expiresAt
+    String id,
+    String title,
+    String inviteCode,
+    String owner,
+    List<LocalDate> dates,
+    LocalTime startTime,
+    LocalTime endTime,
+    List<String> timelist,
+    String createdAt,
+    String updatedAt,
+    String expiresAt
 ) {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
     public RoomResponse(Room room) {
         this(
-                String.valueOf(room.getId()),
-                room.getTitle(),
-                room.getInviteCode(),
-                String.valueOf(room.getOwner().getId()),
-                room.getDates().stream()
-                        .map(RoomDate::getDate)
-                        .collect(Collectors.toList()),
-                room.getStartTime(),
-                room.getEndTime(),
-                generateTimeList(room.getStartTime(), room.getEndTime()),
-                room.getCreatedAt().toLocalDate().format(DATE_FORMATTER),
-                room.getUpdatedAt() == null ? null : room.getUpdatedAt().toLocalDate().format(DATE_FORMATTER),
-                room.getExpiresAt().toLocalDate().format(DATE_FORMATTER)
+            String.valueOf(room.getId()),
+            room.getTitle(),
+            room.getInviteCode(),
+            String.valueOf(room.getOwner().getId()),
+            room.getDates().stream()
+                .map(RoomDate::getDate)
+                .collect(Collectors.toList()),
+            room.getStartTime(),
+            room.getEndTime(),
+            generateTimeList(room.getStartTime(), room.getEndTime()),
+            room.getCreatedAt().toLocalDate().format(DATE_FORMATTER),
+            room.getUpdatedAt() == null ? null : room.getUpdatedAt().toLocalDate().format(DATE_FORMATTER),
+            room.getExpiresAt().toLocalDate().format(DATE_FORMATTER)
         );
     }
 

@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(
-        name = "participants",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"room_id", "user_id"})
+    name = "participants",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"room_id", "user_id"})
 )
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
