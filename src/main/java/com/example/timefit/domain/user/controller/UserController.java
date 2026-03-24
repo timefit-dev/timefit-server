@@ -33,16 +33,16 @@ public class UserController {
 
     @PutMapping("/me")
     public ResponseEntity<UserResponse> updateMyInfo(
-        Authentication authentication,
-        @RequestBody UserUpdateRequest request
+            Authentication authentication,
+            @RequestBody UserUpdateRequest request
     ) {
         Long userId = Long.valueOf(authentication.getName());
 
-        if(request.nickname() != null) {
+        if (request.nickname() != null) {
             userService.updateNickname(userId, request.nickname());
         }
 
-        if(request.profileImageUrl() != null) {
+        if (request.profileImageUrl() != null) {
             userService.updateProfileImage(userId, request.profileImageUrl());
         }
 

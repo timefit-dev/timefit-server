@@ -16,8 +16,8 @@ public class UserService {
 
     public User getUserById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("해당 유저를 찾을 수 없습니다. userId=" + userId)
+                .orElseThrow(()
+                        -> new IllegalArgumentException("해당 유저를 찾을 수 없습니다. userId=" + userId)
                 );
     }
 
